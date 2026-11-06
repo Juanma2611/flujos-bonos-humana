@@ -30,7 +30,10 @@ header{background:#fff;border-bottom:1px solid #DCE6F0}
 .lg.d{width:16px;height:16px;transform:rotate(45deg) scale(.8);border-color:var(--cel);background:var(--cel-s);border-radius:2px}
 .lg.s{border-radius:999px;background:var(--azul);border-color:var(--azul)}
 .scroller{overflow-x:auto;padding:34px 20px 60px}
-.flow{display:flex;flex-direction:column;align-items:center;min-width:max-content;margin:0 auto}
+.flow{position:relative;display:flex;flex-direction:column;align-items:center;min-width:max-content;margin:0 auto;padding:0 70px}
+.loops{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+.end.loop{background:#fff;color:var(--corp);border:2.5px dashed var(--cel);box-shadow:none} .end.loop small{color:var(--tenue)}
+.looplabel{font-family:var(--disp);font-weight:700;font-size:11.5px;fill:var(--corp)}
 
 /* Nodos */
 .node{position:relative;text-align:center;z-index:1}
@@ -163,6 +166,43 @@ footer div{max-width:1500px;margin:0 auto;padding:12px 28px;display:flex;justify
 <div class="link"></div>
 <div class="node end"><b>¡Listo!</b><small>Bono entregado</small></div></div></div></div></div></div></div></div></div></div></div>
 </div></main>
+<script>
+(function(){
+  var LOOPS = [];
+  var flow = document.querySelector('.flow');
+  if (!flow || !LOOPS.length) return;
+  var NS = 'http://www.w3.org/2000/svg';
+  var svg = document.createElementNS(NS, 'svg'); svg.setAttribute('class', 'loops');
+  flow.appendChild(svg);
+  function draw() {
+    var fr = flow.getBoundingClientRect();
+    svg.setAttribute('width', flow.scrollWidth); svg.setAttribute('height', flow.scrollHeight);
+    svg.innerHTML = '<defs><marker id="lp" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#1CB0F6"/></marker></defs>';
+    LOOPS.forEach(function (l, i) {
+      var a = document.getElementById(l.from), b = document.getElementById(l.to);
+      if (!a || !b) return;
+      var ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
+      var x = 22 + i * 16;
+      var ay = ra.top - fr.top + ra.height / 2, ax = ra.left - fr.left;
+      var by = rb.top - fr.top + rb.height / 2, bx = rb.left - fr.left;
+      var d = 'M' + ax + ' ' + ay + ' H' + x + ' V' + by + ' H' + (bx - 6);
+      var path = document.createElementNS(NS, 'path');
+      path.setAttribute('d', d); path.setAttribute('fill', 'none'); path.setAttribute('stroke', '#1CB0F6');
+      path.setAttribute('stroke-width', '2.5'); path.setAttribute('stroke-dasharray', '8 6'); path.setAttribute('marker-end', 'url(#lp)');
+      svg.appendChild(path);
+      if (l.label) {
+        var t = document.createElementNS(NS, 'text'); var my = (ay + by) / 2;
+        t.setAttribute('x', x - 8); t.setAttribute('y', my); t.setAttribute('class', 'looplabel');
+        t.setAttribute('transform', 'rotate(-90 ' + (x - 8) + ' ' + my + ')'); t.setAttribute('text-anchor', 'middle');
+        t.textContent = l.label; svg.appendChild(t);
+      }
+    });
+  }
+  window.addEventListener('load', draw); window.addEventListener('resize', draw);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+  draw();
+})();
+</script>
 <footer><div><span><b>Red médica integral:</b> Humana | Metrored | Hospital Metropolitano | Metro Fraternidad</span><span>Marketing · Flujo operativo de bonos</span></div></footer>
 </body>
 </html>
